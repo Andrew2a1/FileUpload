@@ -1,0 +1,33 @@
+#:kivy 1.0
+
+<Folder>:
+    canvas.before:
+        Line:
+            points: [self.pos, (self.pos[0], self.pos[1] + self.size[1]), (self.pos[0] + self.size[0], self.pos[1] + self.size[1]), (self.pos[0] + self.size[0], self.pos[1]), self.pos]
+
+    BoxLayout:
+        orientation: "vertical"
+        pos: root.pos
+        pos_hint: {"y": 0.15}
+        size_hint: 1, 0.7
+
+        Label:
+            pos_hint: {"x": 0.1}
+            size_hint: 0.8, 0.25
+            text: "Files: 0"
+
+
+        Label:
+            pos_hint: {"x": 0.1}
+            size_hint: 0.8, 0.25
+            text: "Size: 0"
+
+        ProgressBar:
+            pos_hint: {"x": 0.1}
+            size_hint: 0.8, 0.5
+            max: 100
+
+        Label:
+            pos_hint: {"x": 0.1}
+            size_hint: 0.8, 0.25
+            text: "Client: "

@@ -1,0 +1,8 @@
+autoflake
+bcrypt
+mypy
+isort
+black
+rich
+attrs
+kivy[base]
