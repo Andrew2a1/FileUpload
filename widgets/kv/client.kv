@@ -1,12 +1,19 @@
 #:kivy 1.0
 
-<Client>:
-    size_hint_x: None
+<ClientRect@Widget>:
     canvas.before:
         Rectangle:
-            pos: self.pos[0] + self.size[0]/2 - 20, self.pos[1] + self.size[1]/2 - 60
-            size: 40, 120
+            pos: self.pos
+            size: self.size
+
+<Client>:
+    size_hint_x: None
+
+    ClientRect:
+        pos_hint: {"x": 0.3, "top": 0.9}
+        size_hint: 0.4, 0.4
+
     Label:
-        text: "#1"
-        pos_hint: {"x": 0, "bottom": 0.8}
+        text: "id: #1\nt: 5s\ns: 0.5GB"
+        pos_hint: {"x": 0, "top": 0.5}
         size_hint: 1, 0.4
