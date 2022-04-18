@@ -2,17 +2,16 @@
 
 <FileUploadLayout>:
     Folders:
+        id: folders
         pos_hint: {"x": 0, "top": 1}
         size_hint: 1, 0.2
 
-    ClientsQueue:
-        pos_hint: {"x": 0, "top": 0.8}
-        size_hint: 1, 0.3
-
     History:
-        pos_hint: {"x": 0, "top": 0.5}
-        size_hint: 1, 0.3
+        id: history
+        pos_hint: {"x": 0, "top": 0.8}
+        size_hint: 1, 0.6
 
-    ControlWidget:
+    Controls:
+        id: controls
         pos_hint: {"x": 0, "top": 0.2}
         size_hint: 1, 0.2

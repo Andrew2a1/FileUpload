@@ -1,6 +1,6 @@
 #:kivy 1.0
 
-<ControlWidget>:
+<Controls>:
     BoxLayout:
         orientation: "vertical"
 
@@ -14,7 +14,7 @@
             Slider:
                 id: speed_slider
                 max: 100
-                value: 30
+                value: 0
 
             Label:
                 size_hint: 0.1, 1
@@ -24,10 +24,13 @@
             orientation: "horizontal"
 
             Button:
-                text: "Restart"
+                id: reset
+                text: "Reset"
 
             ToggleButton:
+                id: auto
                 text: "Auto"
 
             Button:
+                id: add
                 text: "Add client"
