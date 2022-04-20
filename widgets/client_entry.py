@@ -19,7 +19,8 @@ class ClientEntry(GridLayout):
 
     def update_files(self):
         self.ids.files.text = ", ".join(
-            str(file) for file in self.client.pending + self.client.in_progress
+            [f"[color=00ff00]{file}[/color]" for file in self.client.in_progress]
+            + [str(file) for file in self.client.pending]
         )
 
     def update_time(self):

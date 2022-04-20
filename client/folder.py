@@ -1,7 +1,6 @@
 import threading
 from typing import Optional
 
-from client.client import Client
 from client.file import File
 
 
@@ -11,41 +10,29 @@ class FolderObserver:
 
 
 class Folder:
-    def __init__(self, folder_free: threading.Event):
-        self.current_client: Optional[Client] = None
-        self.current_file: Optional[File] = None
-        self.observers: list[FolderObserver] = []
+    def __init__(self):
+        self.folder_thread: Optional[threading.Thread] = None
+        self.exit_flag = threading.Event()
+        self.upload_speed: float = 0
+        self.progress: float = 0
 
-        self.folder_free = folder_free
-        self.finished = threading.Event()
-        self.finished.set()
+    def is_waiting(self) -> bool:
+        return self.folder_thread is None or not self.folder_thread.is_alive()
 
-    def attach_observer(self, observer: FolderObserver):
-        self.observers.append(observer)
+    def set_upload_speed(self, upload_speed: float):
+        self.upload_speed = upload_speed
 
-    def fire_update(self):
-        updater = threading.Timer(0.05, self.update, args=[0.05])
-        updater.start()
+    def send_file(self, file: File):
+        if not self.is_waiting():
+            raise Exception("Cannot send file when sending other file was not finished")
+        self.folder_thread = threading.Thread(target=self.send_file_thread, args=[file])
+        self.folder_thread.start()
 
-    def set_client(self, client: Client):
-        self.finished.clear()
-        self.current_client = client
-        self.current_file = client.pending_to_in_progress()
-        self.fire_update()
+    def send_file_thread(self, file: File):
+        while not file.upload_finished():
+            self.exit_flag.wait(0.05)
+            if self.exit_flag.is_set():
+                break
 
-    def update(self, dt: float):
-        if self.current_client and self.current_file:
-            self.current_file.upload_part(dt)
-            self.notify_all(
-                self.current_file.already_send / self.current_file.size * 100
-            )
-            if self.current_file.upload_finished():
-                self.current_client.remove_in_progress(self.current_file)
-                self.finished.set()
-                self.folder_free.set()
-            else:
-                self.fire_update()
-
-    def notify_all(self, progress: int):
-        for observer in self.observers:
-            observer.notify(progress)
+            file.upload_part(self.upload_speed)
+            self.progress = file.upload_progress()

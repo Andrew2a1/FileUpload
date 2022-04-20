@@ -32,5 +32,4 @@ class History(FloatLayout):
     def remove_entries(self):
         for entry in self.client_entries:
             self.layout.remove_widget(entry)
-
         self.client_entries = []

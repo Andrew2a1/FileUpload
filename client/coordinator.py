@@ -1,4 +1,3 @@
-import threading
 from typing import Optional
 
 from client.client import Client
@@ -7,57 +6,39 @@ from client.folder import Folder
 
 class Coordinator:
     def __init__(self):
-        self.coordinator_thread = threading.Thread(target=self.__main_loop)
-        self.folder_free = threading.Event()
-        self.clients_lock = threading.Lock()
+        self.folders: list[Folder] = [Folder() for _ in range(5)]
 
-        self.folders: list[Folder] = [Folder(self.folder_free) for _ in range(5)]
-        self.clients: list[Client] = []
+    def exit(self):
+        for folder in self.folders:
+            if not folder.is_waiting():
+                folder.exit_flag.set()
+                folder.folder_thread.join()
 
-    def add_client(self, client: Client):
-        self.clients_lock.acquire()
-        self.clients.append(client)
-        self.clients_lock.release()
-        self.coordinate()
+    def set_speed(self, speed: float):
+        for folder in self.folders:
+            folder.set_upload_speed(speed * 1e5)
 
-    def coordinate(self):
-        if self.coordinator_thread.is_alive():
+    def coordinate(self, clients: list[Client]):
+        clients_with_files = [
+            client for client in clients if client.has_pending_files()
+        ]
+        winner = self.find_winner(clients_with_files)
+
+        if winner is None:
             return
 
-        self.coordinator_thread = threading.Thread(target=self.__main_loop)
-        self.coordinator_thread.run()
-
-    def __main_loop(self):
-        while self.client_count() > 0:
-            self.clients_lock.acquire()
-            self.clients = [client for client in self.clients if not client.finished()]
-            winner = self.find_winner(self.clients)
-            self.clients_lock.release()
-
-            if not winner:
+        for folder in self.folders:
+            if folder.is_waiting():
+                file_to_upload = winner.pending_to_in_progress()
+                folder.send_file(file_to_upload)
                 break
-
-            if not any(folder.finished.is_set() for folder in self.folders):
-                self.folder_free.wait()
-
-            self.folder_free.clear()
-
-            for folder in self.folders:
-                if folder.finished.is_set():
-                    folder.set_client(winner)
-
-    def client_count(self) -> int:
-        self.clients_lock.acquire()
-        count = len(self.clients)
-        self.clients_lock.release()
-        return count
 
     def find_winner(self, clients: list[Client]) -> Optional[Client]:
         clients_count = len(clients)
         scores = [
             (client, self.get_score(client, clients_count))
             for client in clients
-            if client.get_pending_count() > 0
+            if client.wait_time > 0
         ]
 
         if len(scores) == 0:

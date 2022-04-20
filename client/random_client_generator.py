@@ -11,10 +11,9 @@ def IdGenerator():
         yield num
 
 
-id_generator = IdGenerator()
-
-
 class RandomClientGenerator:
+    id_generator = IdGenerator()
+
     @staticmethod
     def generate(max_files=6, max_size=1e9) -> Client:
         new_files = []
@@ -22,5 +21,5 @@ class RandomClientGenerator:
             new_files.append(File(random.randint(1, int(max_size))))
 
         new_files.sort()
-        new_id = next(id_generator)
+        new_id = next(RandomClientGenerator.id_generator)
         return Client(new_id, new_files)
