@@ -27,7 +27,7 @@ class FileUploadLayout(FloatLayout):
         valid_clients = [
             client
             for client in self.clients
-            if len(client.in_progress) > 0 and not client.pending.empty()
+            if len(client.in_progress) > 0 or len(client.pending) > 0
         ]
         self.clients = valid_clients
         self.ids.history.update_clients(valid_clients)
@@ -59,22 +59,6 @@ class FileUploadLayout(FloatLayout):
         for client in self.clients:
             client.update_time(dt * self.speed)
         self.ids.history.update_clients_times()
-
-        winner = self.find_winner(self.clients)
-        
-
-    def find_winner(self, clients: list[Client]):
-        if len(clients) == 0:
-            return
-
-        scores = [(client, self.get_score(client, len(clients))) for client in clients]
-        return max(scores, key=lambda s: s[1])[0]
-
-    def get_score(self, client: Client, clients_count: int):
-        t = client.wait_time
-        s = client.pending[0].size
-        c = clients_count
-        return t / (c + 1) + c / (s + 1)
 
     def update_speed(self, new_speed: int):
         self.speed = new_speed
