@@ -19,9 +19,10 @@ class File:
     def __str__(self) -> str:
         return sizeof_fmt(self.size)
 
-    def upload_part(self, dt: float):
-        send = dt * max(1, math.log(self.size))
-        self.already_send = int(min(self.size, self.already_send + send))
+    def upload_part(self, dt: float) -> int:
+        send = int(dt * max(1, math.log(self.size)))
+        self.already_send = min(self.size, self.already_send + send)
+        return send
 
     def upload_progress(self) -> float:
         return self.already_send / self.size

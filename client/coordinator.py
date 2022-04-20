@@ -1,12 +1,20 @@
 from typing import Optional
 
 from client.client import Client
-from client.folder import Folder
+from client.file import File
+from client.folder import Folder, FolderObserver
 
 
-class Coordinator:
+class Coordinator(FolderObserver):
     def __init__(self):
         self.folders: list[Folder] = [Folder() for _ in range(5)]
+        self.clients: list[Client] = []
+
+        for folder in self.folders:
+            folder.attach_observer(self)
+
+    def attach_to_folder(self, folder_no: int, observer: FolderObserver):
+        self.folders[folder_no].attach_observer(observer)
 
     def exit(self):
         for folder in self.folders:
@@ -18,9 +26,9 @@ class Coordinator:
         for folder in self.folders:
             folder.set_upload_speed(speed * 1e5)
 
-    def coordinate(self, clients: list[Client]):
+    def coordinate(self):
         clients_with_files = [
-            client for client in clients if client.has_pending_files()
+            client for client in self.clients if client.has_pending_files()
         ]
         winner = self.find_winner(clients_with_files)
 
@@ -30,8 +38,13 @@ class Coordinator:
         for folder in self.folders:
             if folder.is_waiting():
                 file_to_upload = winner.pending_to_in_progress()
-                folder.send_file(file_to_upload)
+                folder.send_file(file_to_upload, winner)
                 break
+
+    def update_upload_finished(self, client: Client, file: File):
+        client.remove_in_progress(file)
+        if client.finished():
+            self.clients.remove(client)
 
     def find_winner(self, clients: list[Client]) -> Optional[Client]:
         clients_count = len(clients)

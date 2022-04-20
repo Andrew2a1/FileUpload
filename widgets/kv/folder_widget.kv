@@ -12,22 +12,25 @@
         size_hint: 1, 0.7
 
         Label:
+            id: file_count
             pos_hint: {"x": 0.1}
             size_hint: 0.8, 0.25
             text: "Files: 0"
 
-
         Label:
+            id: file_size
             pos_hint: {"x": 0.1}
             size_hint: 0.8, 0.25
             text: "Size: 0"
 
         ProgressBar:
+            id: progress
             pos_hint: {"x": 0.1}
             size_hint: 0.8, 0.5
             max: 100
 
         Label:
+            id: current_client
             pos_hint: {"x": 0.1}
             size_hint: 0.8, 0.25
             text: "Client: "
