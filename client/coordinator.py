@@ -62,4 +62,4 @@ class Coordinator(FolderObserver):
         t = client.wait_time
         s = client.get_top_pending_size()
         c = clients_count
-        return t / (c + 1) + c / (s + 1)
+        return t / (c + 1) + c / (s/1e7 + 1)
